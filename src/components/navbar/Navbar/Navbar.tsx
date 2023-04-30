@@ -5,6 +5,7 @@ import Logo from '@/components/Logo'
 import useIsInIframe from '@/hooks/useIsInIframe'
 import usePrevious from '@/hooks/usePrevious'
 import { useMyAccount } from '@/stores/my-account'
+import { useWeb3Auth } from '@/stores/web3-auth'
 import { cx } from '@/utils/class-names'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -32,12 +33,12 @@ export default function Navbar({ customContent, ...props }: NavbarProps) {
   const isInIframe = useIsInIframe()
   const address = useMyAccount((state) => state.address)
   const prevAddress = usePrevious(address)
-  const isLoggedIn = !!address
 
   const [openLoginModal, setOpenLoginModal] = useState(false)
   const [openPrivateKeyNotice, setOpenPrivateKeyNotice] = useState(false)
   const isLoggingInWithKey = useRef(false)
   const timeoutRef = useRef<any>()
+  const { login, authenticatedUser } = useWeb3Auth()
 
   useEffect(() => {
     const isChangedAddressFromGuest = prevAddress === null && address
@@ -54,19 +55,15 @@ export default function Navbar({ customContent, ...props }: NavbarProps) {
     }, 10_000)
   }, [address, isInitializedAddress, prevAddress])
 
-  const login = () => {
-    setOpenLoginModal(true)
-  }
-
   const renderAuthComponent = () => {
     if (!isInitialized) return <div className='w-9' />
-    return isLoggedIn ? (
+    return authenticatedUser ? (
       <ProfileAvatar
         popOverControl={{
           isOpen: openPrivateKeyNotice,
           setIsOpen: setOpenPrivateKeyNotice,
         }}
-        address={address}
+        address={authenticatedUser.email}
       />
     ) : (
       <Button onClick={login}>Login</Button>

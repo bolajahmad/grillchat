@@ -8,6 +8,7 @@ import { useCommentIdsByPostId } from '@/services/subsocial/commentIds'
 import { getIpfsContentUrl } from '@/utils/ipfs'
 import { PostData } from '@subsocial/api/types'
 import Image, { ImageProps } from 'next/image'
+import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { HiOutlineChevronLeft } from 'react-icons/hi2'
 import ChatPageNavbarExtension from './ChatPageNavbarExtension'
@@ -63,6 +64,7 @@ function NavbarChatInfo({
   messageCount: number
   post?: PostData | null
 }) {
+  const router = useRouter()
   const isInIframe = useIsInIframe()
 
   if (!post) return null
@@ -76,7 +78,8 @@ function NavbarChatInfo({
       <div className='mr-2 flex w-9 items-center justify-center'>
         <Button
           size='circle'
-          href={isInIframe ? `/${spaceId ?? ''}` : '/'}
+          href={isInIframe ? `/${spaceId ?? ''}` : undefined}
+          onClick={() => (isInIframe ? undefined : router.back())}
           nextLinkProps={{ replace: isInIframe }}
           variant='transparent'
         >
