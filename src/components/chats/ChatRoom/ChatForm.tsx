@@ -77,6 +77,8 @@ export default function ChatForm({
     setIsRequestingEnergy(false)
   }, [hasEnoughEnergy])
 
+  console.log({ hasEnoughEnergy })
+
   const shouldSendMessage =
     isRequestingEnergy || (isLoggedIn && hasEnoughEnergy)
   const isDisabled = !processMessage(message)
@@ -130,6 +132,7 @@ export default function ChatForm({
     <CaptchaInvisible>
       {(runCaptcha) => {
         const submitForm = async (e?: SyntheticEvent) => {
+          console.log({ shouldSendMessage })
           if (shouldSendMessage) {
             handleSubmit(null, e)
             return
@@ -148,7 +151,7 @@ export default function ChatForm({
               onEnterToSubmitForm={submitForm}
               ref={textAreaRef}
               value={message}
-              onChange={(e) => setMessage((e.target as any).value)}
+              onChange={(e) => setMessage(e.target.value)}
               placeholder='Message...'
               rows={1}
               autoComplete='off'

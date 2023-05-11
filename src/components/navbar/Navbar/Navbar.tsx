@@ -5,11 +5,10 @@ import Logo from '@/components/Logo'
 import useIsInIframe from '@/hooks/useIsInIframe'
 import usePrevious from '@/hooks/usePrevious'
 import { useMyAccount } from '@/stores/my-account'
-import { useWeb3Auth } from '@/stores/web3-auth'
 import { cx } from '@/utils/class-names'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { ComponentProps, useEffect, useRef, useState } from 'react'
+import { ComponentProps, useCallback, useEffect, useRef, useState } from 'react'
 
 const ProfileAvatar = dynamic(() => import('./ProfileAvatar'), {
   ssr: false,
@@ -31,14 +30,13 @@ export default function Navbar({ customContent, ...props }: NavbarProps) {
     (state) => state.isInitializedAddress
   )
   const isInIframe = useIsInIframe()
-  const address = useMyAccount((state) => state.address)
+  const { address, authenticatedUser } = useMyAccount((state) => state)
   const prevAddress = usePrevious(address)
 
   const [openLoginModal, setOpenLoginModal] = useState(false)
   const [openPrivateKeyNotice, setOpenPrivateKeyNotice] = useState(false)
   const isLoggingInWithKey = useRef(false)
   const timeoutRef = useRef<any>()
-  const { login, authenticatedUser } = useWeb3Auth()
 
   useEffect(() => {
     const isChangedAddressFromGuest = prevAddress === null && address
@@ -55,20 +53,21 @@ export default function Navbar({ customContent, ...props }: NavbarProps) {
     }, 10_000)
   }, [address, isInitializedAddress, prevAddress])
 
-  const renderAuthComponent = () => {
+  const renderAuthComponent = useCallback(() => {
     if (!isInitialized) return <div className='w-9' />
     return authenticatedUser ? (
       <ProfileAvatar
+        avatar={authenticatedUser.profilePic}
         popOverControl={{
           isOpen: openPrivateKeyNotice,
           setIsOpen: setOpenPrivateKeyNotice,
         }}
-        address={authenticatedUser.email}
+        address={authenticatedUser.email ?? authenticatedUser.address}
       />
     ) : (
-      <Button onClick={login}>Login</Button>
+      <Button onClick={() => setOpenLoginModal(true)}>Login</Button>
     )
-  }
+  }, [authenticatedUser, isInitialized, openPrivateKeyNotice])
   const authComponent = renderAuthComponent()
   const colorModeToggler = <ColorModeToggler />
 
