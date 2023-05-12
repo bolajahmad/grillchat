@@ -8,7 +8,7 @@ import { useMyAccount } from '@/stores/my-account'
 import { cx } from '@/utils/class-names'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { ComponentProps, useEffect, useRef, useState } from 'react'
+import { ComponentProps, useCallback, useEffect, useRef, useState } from 'react'
 
 const ProfileAvatar = dynamic(() => import('./ProfileAvatar'), {
   ssr: false,
@@ -30,9 +30,8 @@ export default function Navbar({ customContent, ...props }: NavbarProps) {
     (state) => state.isInitializedAddress
   )
   const isInIframe = useIsInIframe()
-  const address = useMyAccount((state) => state.address)
+  const { address, authenticatedUser } = useMyAccount((state) => state)
   const prevAddress = usePrevious(address)
-  const isLoggedIn = !!address
 
   const [openLoginModal, setOpenLoginModal] = useState(false)
   const [openPrivateKeyNotice, setOpenPrivateKeyNotice] = useState(false)
@@ -54,24 +53,21 @@ export default function Navbar({ customContent, ...props }: NavbarProps) {
     }, 10_000)
   }, [address, isInitializedAddress, prevAddress])
 
-  const login = () => {
-    setOpenLoginModal(true)
-  }
-
-  const renderAuthComponent = () => {
+  const renderAuthComponent = useCallback(() => {
     if (!isInitialized) return <div className='w-9' />
-    return isLoggedIn ? (
+    return authenticatedUser ? (
       <ProfileAvatar
+        avatar={authenticatedUser.profilePic}
         popOverControl={{
           isOpen: openPrivateKeyNotice,
           setIsOpen: setOpenPrivateKeyNotice,
         }}
-        address={address}
+        address={authenticatedUser.email ?? authenticatedUser.address}
       />
     ) : (
-      <Button onClick={login}>Login</Button>
+      <Button onClick={() => setOpenLoginModal(true)}>Login</Button>
     )
-  }
+  }, [authenticatedUser, isInitialized, openPrivateKeyNotice])
   const authComponent = renderAuthComponent()
   const colorModeToggler = <ColorModeToggler />
 

@@ -7,6 +7,7 @@ import useRandomColor from '@/hooks/useRandomColor'
 import useWrapInRef from '@/hooks/useWrapInRef'
 import { isOptimisticId } from '@/services/subsocial/utils'
 import { useSendEvent } from '@/stores/analytics'
+import { useMyAccount } from '@/stores/my-account'
 import { cx } from '@/utils/class-names'
 import { getTimeRelativeToNow } from '@/utils/date'
 import { copyToClipboard } from '@/utils/text'
@@ -64,6 +65,7 @@ export default function ChatItem({
   getRepliedElement,
   ...props
 }: ChatItemProps) {
+  const authUser = useMyAccount((state) => state.authenticatedUser)
   const commentId = comment.id
   const isSent = !isOptimisticId(commentId)
   const [openMetadata, setOpenMetadata] = useState(false)
@@ -141,7 +143,11 @@ export default function ChatItem({
       )}
     >
       {!isMyMessage && (
-        <AddressAvatar address={ownerId} className='flex-shrink-0' />
+        <AddressAvatar
+          address={ownerId}
+          avatar={authUser!.profilePic}
+          className='flex-shrink-0'
+        />
       )}
       <CommonCustomContextMenu menus={menus}>
         {(_, onContextMenu, referenceProps) => {

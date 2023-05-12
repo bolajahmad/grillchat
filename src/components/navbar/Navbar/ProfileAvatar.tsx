@@ -6,6 +6,7 @@ import ProfileModal from './ProfileModal'
 
 export type ProfileAvatarProps = ComponentProps<'div'> & {
   address: string
+  avatar: string
   popOverControl?: {
     isOpen: boolean
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
@@ -15,6 +16,7 @@ export type ProfileAvatarProps = ComponentProps<'div'> & {
 export default function ProfileAvatar({
   address,
   popOverControl,
+  avatar,
   ...props
 }: ProfileAvatarProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -30,6 +32,7 @@ export default function ProfileAvatar({
       <ProfileModal
         address={address}
         isOpen={isOpen}
+        avatar={avatar}
         closeModal={() => setIsOpen(false)}
         notification={{
           showNotif: showNotif,
@@ -40,6 +43,7 @@ export default function ProfileAvatar({
         <AddressAvatar
           onClick={() => setIsOpen(true)}
           address={address}
+          avatar={avatar}
           className='relative z-10 cursor-pointer'
         />
         <PopOver
